@@ -198,78 +198,305 @@ body {
   display: none !important;
 }
 
-/* ── Golden Push ── */
-.papipu-golden {
+/* ── Milestone Card System ── */
+.papipu-milestone {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   padding: max(1rem, env(safe-area-inset-top)) 1rem
     max(1rem, env(safe-area-inset-bottom));
-  background:
-    radial-gradient(
-      ellipse 120% 60% at 50% 40%,
-      rgba(212, 175, 55, 0.16) 0%,
-      transparent 68%
-    ),
-    #000;
+  background: #000;
+
+  /* Rank-driven tokens (default: gold) */
+  --accent: #d4af37;
+  --bright: #fff3c4;
+  --glow: rgba(212, 175, 55, 0.6);
+  --card-top: #161206;
+  --card-bottom: #0b0a05;
+  --flash-color: rgba(255, 220, 120, 0.42);
 }
 
-.papipu-golden.hidden {
+.papipu-milestone.hidden {
   display: none;
 }
 
-.papipu-golden-inner {
+.papipu-milestone.rank-bronze {
+  --accent: #b87333;
+  --bright: #f0b070;
+  --glow: rgba(205, 133, 63, 0.55);
+  --card-top: #1c1206;
+  --card-bottom: #0c0803;
+  --flash-color: rgba(230, 160, 90, 0.3);
+}
+
+.papipu-milestone.rank-silver {
+  --accent: #c0c0c0;
+  --bright: #f5f5f5;
+  --glow: rgba(210, 210, 210, 0.55);
+  --card-top: #17181a;
+  --card-bottom: #0a0b0c;
+  --flash-color: rgba(230, 230, 230, 0.32);
+}
+
+.papipu-milestone.rank-gold {
+  --accent: #d4af37;
+  --bright: #fff3c4;
+  --glow: rgba(212, 175, 55, 0.6);
+  --card-top: #161206;
+  --card-bottom: #0b0a05;
+  --flash-color: rgba(255, 220, 120, 0.42);
+}
+
+/* Background glow layer (rank-tinted) */
+.papipu-milestone-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 120% 60% at 50% 38%,
+    var(--glow) 0%,
+    transparent 68%
+  );
+}
+
+/* Flash */
+.papipu-milestone-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+}
+
+.papipu-milestone-flash-active {
+  animation: papipu-milestone-flash 0.3s ease-out forwards;
+}
+
+@keyframes papipu-milestone-flash {
+  0% {
+    background: var(--flash-color);
+    opacity: 1;
+  }
+
+  100% {
+    background: transparent;
+    opacity: 0;
+  }
+}
+
+/* Confetti */
+.papipu-milestone-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.papipu-milestone-confetti-piece {
+  position: absolute;
+  top: -8%;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  background: var(--color);
+  box-shadow: 0 0 7px var(--color);
+  opacity: 0;
+  will-change: transform;
+  animation: papipu-milestone-confetti-fall var(--duration) linear infinite;
+  animation-delay: var(--delay);
+}
+
+.papipu-milestone-confetti-0 {
+  border-radius: 9999px;
+}
+
+.papipu-milestone-confetti-1 {
+  width: calc(var(--size) * 0.5);
+  border-radius: 2px;
+}
+
+.papipu-milestone-confetti-2 {
+  height: calc(var(--size) * 0.55);
+  border-radius: 9999px 9999px 9999px 2px;
+}
+
+@keyframes papipu-milestone-confetti-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(var(--rotate));
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  92% {
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: translate3d(calc(var(--drift) * var(--sway)), 112vh, 0)
+      rotate(calc(var(--rotate) + 620deg));
+    opacity: 0;
+  }
+}
+
+/* Layout */
+.papipu-milestone-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
   width: 100%;
   max-width: 28rem;
   text-align: center;
 }
 
-.papipu-golden-title {
-  margin: 0 0 0.75rem;
-  font-size: clamp(1.6rem, 6vw, 2rem);
+.papipu-milestone-card {
+  position: relative;
+  width: 100%;
+  padding: 2.5rem 1.5rem 2.25rem;
+  border-radius: 1.75rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background:
+    radial-gradient(
+      ellipse 90% 70% at 50% 32%,
+      color-mix(in srgb, var(--accent) 22%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--card-top) 0%, var(--card-bottom) 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 24px 60px rgba(0, 0, 0, 0.6),
+    0 0 80px color-mix(in srgb, var(--accent) 24%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--bright) 20%, transparent);
+}
+
+.papipu-milestone-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.papipu-milestone-sparkle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--bright);
+  box-shadow: 0 0 10px var(--glow);
+  opacity: 0.45;
+  animation: papipu-milestone-sparkle 2.6s ease-in-out infinite;
+}
+
+@keyframes papipu-milestone-sparkle {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.25;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 0.95;
+  }
+}
+
+.papipu-milestone-title {
+  margin: 0 0 0.9rem;
+  font-size: clamp(2.1rem, 9vw, 3rem);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #f5e6a8;
-  text-shadow: 0 0 24px rgba(212, 175, 55, 0.45);
+  letter-spacing: 0.14em;
+  line-height: 1.05;
+  color: var(--bright);
+  text-shadow:
+    0 0 12px var(--glow),
+    0 0 32px var(--glow),
+    0 0 64px color-mix(in srgb, var(--glow) 55%, transparent);
 }
 
-.papipu-golden-subtitle {
-  margin: 0 0 1.6rem;
-  font-size: clamp(1rem, 4.2vw, 1.15rem);
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  color: #d4af37;
+.papipu-milestone-title-enter {
+  animation: papipu-milestone-title-in 0.72s cubic-bezier(0.34, 1.35, 0.64, 1) both;
 }
 
-.papipu-golden-counter {
-  margin: 0 0 2rem;
+@keyframes papipu-milestone-title-in {
+  0% {
+    transform: scale(0.74);
+    opacity: 0;
+  }
+
+  62% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.papipu-milestone-message {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1rem, 4.3vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--bright) 82%, var(--accent));
+  text-shadow: 0 0 16px color-mix(in srgb, var(--glow) 70%, transparent);
+}
+
+.papipu-milestone-message:last-of-type {
+  margin-bottom: 1.5rem;
+}
+
+.papipu-milestone-counter {
+  margin: 0 0 1.5rem;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  font-size: min(calc((100vw - 2rem) / 14.6), 1.7rem);
+  font-size: min(calc((100vw - 5rem) / 14.6), 1.95rem);
   font-weight: 700;
   line-height: 1;
   color: #fafafa;
-  text-shadow: 0 0 28px rgba(212, 175, 55, 0.35);
+  text-shadow:
+    0 0 20px var(--glow),
+    0 0 40px color-mix(in srgb, var(--glow) 60%, transparent);
 }
 
-.papipu-golden-actions {
+.papipu-milestone-tagline {
+  margin: 0;
+  font-size: clamp(1rem, 4.4vw, 1.2rem);
+  font-weight: 300;
+  letter-spacing: 0.13em;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--bright) 80%, var(--accent));
+  text-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent);
+}
+
+.papipu-milestone-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   align-items: center;
+  width: 100%;
 }
 
-.papipu-golden-btn {
+.papipu-milestone-btn {
   width: min(100%, 16rem);
   min-height: 3rem;
-  border: 1px solid #8b6914;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, #000);
   border-radius: 9999px;
   background: linear-gradient(180deg, #1c1408 0%, #0a0804 100%);
-  color: #e8d5a3;
+  color: var(--bright);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -277,8 +504,155 @@ body {
   touch-action: manipulation;
 }
 
-.papipu-golden-btn-secondary {
+.papipu-milestone-btn-secondary {
   border-color: #52525b;
   background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
   color: #d4d4d8;
+}
+
+/* ── World Record (完全別物: 宇宙 / 虹色 / 地球の光) ── */
+.papipu-milestone.rank-world-record {
+  --accent: #8b7bff;
+  --bright: #ffffff;
+  --glow: rgba(140, 190, 255, 0.55);
+  --flash-color: rgba(150, 190, 255, 0.42);
+  background: radial-gradient(
+      ellipse at 50% 28%,
+      #241a52 0%,
+      #0c0a24 50%,
+      #000006 100%
+    );
+}
+
+.rank-world-record .papipu-milestone-bg {
+  background:
+    radial-gradient(
+      circle at 50% 118%,
+      rgba(120, 200, 255, 0.5) 0%,
+      rgba(80, 140, 255, 0.16) 14%,
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse 60% 42% at 50% 104%,
+      rgba(255, 200, 120, 0.32) 0%,
+      transparent 62%
+    );
+}
+
+/* Light pillars rising from the earth */
+.rank-world-record .papipu-milestone-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 114%,
+    rgba(255, 110, 199, 0.12) 0deg 2deg,
+    transparent 2deg 5deg,
+    rgba(77, 210, 255, 0.12) 5deg 7deg,
+    transparent 7deg 10deg,
+    rgba(87, 255, 143, 0.12) 10deg 12deg,
+    transparent 12deg 15deg
+  );
+  mask-image: radial-gradient(
+    ellipse 90% 90% at 50% 112%,
+    #000 0%,
+    transparent 60%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 90% 90% at 50% 112%,
+    #000 0%,
+    transparent 60%
+  );
+  animation: papipu-wr-rays 40s linear infinite;
+}
+
+@keyframes papipu-wr-rays {
+  0% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+  100% {
+    transform: rotate(-4deg);
+  }
+}
+
+/* Stars */
+.rank-world-record .papipu-milestone-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 78% 12%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 34% 30%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 62% 24%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 88% 34%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 22% 42%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 50% 8%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 6% 30%, rgba(255, 255, 255, 0.6), transparent);
+  opacity: 0.9;
+}
+
+.rank-world-record .papipu-milestone-card {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(12, 10, 36, 0.82) 0%, rgba(6, 6, 20, 0.9) 100%)
+      padding-box,
+    linear-gradient(
+        135deg,
+        #ff6ec7 0%,
+        #8b7bff 30%,
+        #4dd2ff 60%,
+        #57ff8f 100%
+      )
+      border-box;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.6),
+    0 0 90px rgba(120, 160, 255, 0.3);
+}
+
+.rank-world-record .papipu-milestone-title {
+  background: linear-gradient(
+    100deg,
+    #ff6ec7 0%,
+    #8b7bff 26%,
+    #4dd2ff 52%,
+    #57ff8f 76%,
+    #ffe14d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px rgba(140, 190, 255, 0.55));
+}
+
+.rank-world-record .papipu-milestone-message {
+  color: #dfe6ff;
+  text-shadow: 0 0 16px rgba(140, 190, 255, 0.4);
+}
+
+.rank-world-record .papipu-milestone-counter {
+  display: inline-block;
+  padding: 0.7rem 1.1rem;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgba(8, 10, 30, 0.72), rgba(8, 10, 30, 0.72)) padding-box,
+    linear-gradient(100deg, #ff6ec7, #8b7bff, #4dd2ff, #57ff8f) border-box;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(140, 190, 255, 0.55);
+}
+
+.rank-world-record .papipu-milestone-tagline {
+  color: #dfe6ff;
+  text-shadow: 0 0 16px rgba(140, 190, 255, 0.4);
+}
+
+.rank-world-record .papipu-milestone-btn {
+  border-color: rgba(140, 160, 255, 0.5);
+  color: #e8ecff;
 }
