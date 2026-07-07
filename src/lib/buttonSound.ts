@@ -1,105 +1,46 @@
-const BUTTON_POP_SRC = "/sounds/button-pop.wav";
-const VOLUME = 0.58;
-const POOL_SIZE = 6;
+const BUTTON_POP_SRC = "/sounds/button-pop.m4a";
 
-let audioContext: AudioContext | null = null;
-let buffer: AudioBuffer | null = null;
-let loadPromise: Promise<AudioBuffer | null> | null = null;
-let pool: HTMLAudioElement[] | null = null;
-let poolIndex = 0;
+const audioCache: Record<string, HTMLAudioElement> = {};
 
-function getAudioContext(): AudioContext {
-  audioContext ??= new AudioContext();
-  return audioContext;
-}
-
-function loadBuffer(): Promise<AudioBuffer | null> {
-  if (buffer) {
-    return Promise.resolve(buffer);
-  }
-
-  if (loadPromise) {
-    return loadPromise;
-  }
-
-  loadPromise = (async () => {
-    try {
-      const response = await fetch(BUTTON_POP_SRC);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const context = getAudioContext();
-      buffer = await context.decodeAudioData(arrayBuffer.slice(0));
-      return buffer;
-    } catch (error) {
-      console.warn("Button pop preload failed:", error);
-      return null;
-    }
-  })();
-
-  return loadPromise;
-}
-
-function playFromBuffer(audioBuffer: AudioBuffer): void {
-  const context = getAudioContext();
-  const source = context.createBufferSource();
-  const gain = context.createGain();
-
-  gain.gain.value = VOLUME;
-  source.buffer = audioBuffer;
-  source.connect(gain);
-  gain.connect(context.destination);
-  source.start(0);
-}
-
-function getPoolAudio(): HTMLAudioElement {
-  if (!pool) {
-    pool = Array.from({ length: POOL_SIZE }, () => {
-      const audio = new Audio(BUTTON_POP_SRC);
-      audio.preload = "auto";
-      return audio;
+function getAudio(src: string): HTMLAudioElement {
+  if (!audioCache[src]) {
+    const audio = new Audio();
+    audio.preload = "none";
+    audio.src = src;
+    audio.addEventListener("error", () => {
+      console.warn("Audio skipped (not found or unsupported):", src);
     });
+    audioCache[src] = audio;
   }
-
-  const audio = pool[poolIndex % POOL_SIZE];
-  poolIndex += 1;
-  return audio;
+  return audioCache[src];
 }
 
-function playFromPool(): void {
+function tryPlaySrc(src: string): void {
+  if (!src) return;
+
   try {
-    const audio = getPoolAudio();
-    audio.volume = VOLUME;
-    audio.currentTime = 0;
-    void audio.play().catch((error) => {
-      console.warn("Button pop play failed:", error);
-    });
-  } catch (error) {
-    console.warn("Button pop play failed:", error);
-  }
-}
+    const audio = getAudio(src);
 
-export function primeButtonPop(): void {
-  void loadBuffer();
+    if (audio.error) {
+      return;
+    }
+
+    audio.currentTime = 0;
+    if (audio.readyState === 0) {
+      audio.load();
+    }
+
+    const playPromise = audio.play();
+    if (playPromise) {
+      playPromise.catch((error) => {
+        console.warn("Audio play failed:", src, error);
+      });
+    }
+  } catch (error) {
+    console.warn("Audio play failed:", src, error);
+  }
 }
 
 export function playButtonPop(): void {
-  void (async () => {
-    try {
-      const context = getAudioContext();
-      await context.resume();
-
-      const audioBuffer = await loadBuffer();
-      if (audioBuffer) {
-        playFromBuffer(audioBuffer);
-        return;
-      }
-    } catch (error) {
-      console.warn("Button pop play failed:", error);
-    }
-
-    playFromPool();
-  })();
+  tryPlaySrc(BUTTON_POP_SRC);
 }

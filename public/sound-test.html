@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>PapipuButton Sound Test</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: #000;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      button {
+        width: min(80vw, 320px);
+        height: min(80vw, 320px);
+        border: none;
+        border-radius: 9999px;
+        background: #e02020;
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      type="button"
+      onclick="console.log('click'); playSound('/sounds/hit-001.m4a');"
+    >
+      Test Sound
+    </button>
+
+    <script src="/papipu-audio.js"></script>
+  </body>
+</html>

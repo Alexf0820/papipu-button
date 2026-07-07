@@ -1,23 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { playButtonPop, primeButtonPop } from "@/lib/buttonSound";
+import { useRef, useState } from "react";
+import type { PointerEvent } from "react";
+import { playButtonPop } from "@/lib/buttonSound";
 
 const PLACEHOLDER_COUNT = "000000000000000000000000";
+const SOUND_GUARD_MS = 120;
 
 export default function PapipuApp() {
   const [pressed, setPressed] = useState(false);
   const [flashing, setFlashing] = useState(false);
+  const lastSoundAtRef = useRef(0);
 
-  useEffect(() => {
-    primeButtonPop();
-  }, []);
-
-  const press = () => {
-    setPressed(true);
-    setFlashing(true);
+  const playSoundOnce = () => {
+    const now = Date.now();
+    if (now - lastSoundAtRef.current < SOUND_GUARD_MS) {
+      return;
+    }
+    lastSoundAtRef.current = now;
     playButtonPop();
   };
+
+  const pressVisual = () => {
+    setPressed(true);
+    setFlashing(true);
+  };
+
+  const handleTouchStart = () => {
+    playSoundOnce();
+    pressVisual();
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
+    playSoundOnce();
+    pressVisual();
+  };
+
   const release = () => setPressed(false);
 
   return (
@@ -39,7 +61,8 @@ export default function PapipuApp() {
               type="button"
               aria-label="Papipu Button"
               className={`papipu-button${pressed ? " papipu-button-pressed" : ""}`}
-              onPointerDown={press}
+              onTouchStart={handleTouchStart}
+              onPointerDown={handlePointerDown}
               onPointerUp={release}
               onPointerLeave={release}
               onPointerCancel={release}
