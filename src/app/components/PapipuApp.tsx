@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { playButtonPop, primeButtonPop } from "@/lib/buttonSound";
 
 const PLACEHOLDER_COUNT = "000000000000000000000000";
 
@@ -8,9 +9,14 @@ export default function PapipuApp() {
   const [pressed, setPressed] = useState(false);
   const [flashing, setFlashing] = useState(false);
 
+  useEffect(() => {
+    primeButtonPop();
+  }, []);
+
   const press = () => {
     setPressed(true);
     setFlashing(true);
+    playButtonPop();
   };
   const release = () => setPressed(false);
 
