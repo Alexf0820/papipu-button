@@ -52,6 +52,8 @@ export default function RootLayout({
         <script src="/papipu-button.js" suppressHydrationWarning />
         {/* eslint-disable-next-line @next/next/no-sync-scripts -- 世界カウンター（音声とは独立） */}
         <script src="/papipu-counter.js" suppressHydrationWarning />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts -- Golden Push（音声・カウンター処理とは独立） */}
+        <script src="/papipu-golden.js" suppressHydrationWarning />
       </body>
     </html>
   );

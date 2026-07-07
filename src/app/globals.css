@@ -193,3 +193,92 @@ body {
   letter-spacing: 0.14em;
   color: #52525b;
 }
+
+.papipu-page-hidden {
+  display: none !important;
+}
+
+/* ── Golden Push ── */
+.papipu-golden {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem
+    max(1rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(
+      ellipse 120% 60% at 50% 40%,
+      rgba(212, 175, 55, 0.16) 0%,
+      transparent 68%
+    ),
+    #000;
+}
+
+.papipu-golden.hidden {
+  display: none;
+}
+
+.papipu-golden-inner {
+  width: 100%;
+  max-width: 28rem;
+  text-align: center;
+}
+
+.papipu-golden-title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #f5e6a8;
+  text-shadow: 0 0 24px rgba(212, 175, 55, 0.45);
+}
+
+.papipu-golden-subtitle {
+  margin: 0 0 1.6rem;
+  font-size: clamp(1rem, 4.2vw, 1.15rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: #d4af37;
+}
+
+.papipu-golden-counter {
+  margin: 0 0 2rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: min(calc((100vw - 2rem) / 14.6), 1.7rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #fafafa;
+  text-shadow: 0 0 28px rgba(212, 175, 55, 0.35);
+}
+
+.papipu-golden-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.papipu-golden-btn {
+  width: min(100%, 16rem);
+  min-height: 3rem;
+  border: 1px solid #8b6914;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #1c1408 0%, #0a0804 100%);
+  color: #e8d5a3;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.papipu-golden-btn-secondary {
+  border-color: #52525b;
+  background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+  color: #d4d4d8;
+}
