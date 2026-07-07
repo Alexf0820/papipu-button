@@ -1,8 +1,6 @@
 (function () {
   "use strict";
 
-  var BUTTON_SOUND = "/sounds/button-pop.m4a";
-
   var initialized = false;
   var elTapButton;
   var elCounter;
@@ -12,16 +10,28 @@
     elCounter = document.getElementById("papipu-counter");
   }
 
+  function clearPressClasses() {
+    if (!elTapButton) return;
+    elTapButton.classList.remove("tap-pop");
+    elTapButton.classList.remove("papipu-button-pressed");
+  }
+
   function playTapAnimation() {
     if (!elTapButton) return;
+    elTapButton.classList.remove("tap-pop");
     elTapButton.classList.remove("papipu-button-pressed");
-    requestAnimationFrame(function () {
-      if (!elTapButton) return;
-      elTapButton.classList.add("papipu-button-pressed");
-    });
-    window.setTimeout(function () {
-      if (elTapButton) elTapButton.classList.remove("papipu-button-pressed");
-    }, 150);
+    void elTapButton.offsetWidth;
+    elTapButton.classList.add("tap-pop");
+    elTapButton.classList.add("papipu-button-pressed");
+  }
+
+  function handleAnimationEnd(event) {
+    if (!elTapButton || event.target !== elTapButton) return;
+    elTapButton.classList.remove("tap-pop");
+  }
+
+  function releasePress() {
+    clearPressClasses();
   }
 
   function playCounterFlash() {
@@ -47,6 +57,11 @@
 
     initialized = true;
     elTapButton.addEventListener("click", handleTap);
+    elTapButton.addEventListener("animationend", handleAnimationEnd);
+    elTapButton.addEventListener("touchend", releasePress);
+    elTapButton.addEventListener("touchcancel", releasePress);
+    elTapButton.addEventListener("pointerup", releasePress);
+    elTapButton.addEventListener("pointercancel", releasePress);
   }
 
   function scheduleInit() {
