@@ -93,7 +93,5 @@
     ]);
   }
 
-  window.getAudio = getAudio;
-  window.tryPlaySrc = tryPlaySrc;
   window.playSound = playSound;
 })();
