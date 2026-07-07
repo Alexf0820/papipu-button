@@ -1,26 +1,195 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* ── Layout ── */
+.papipu-page {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem
+    max(0.85rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(
+      ellipse 120% 55% at 50% 42%,
+      rgba(255, 40, 40, 0.07) 0%,
+      transparent 65%
+    ),
+    #000;
+}
+
+.papipu-main {
+  display: flex;
+  width: 100%;
+  max-width: 28rem;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.4rem, 5vh, 3rem);
+}
+
+/* ── World counter ── */
+.papipu-counter-wrap {
+  width: 100%;
+  text-align: center;
+  padding-top: 0.5rem;
+}
+
+.papipu-counter-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em; /* re-center: letter-spacing adds trailing space */
+  text-transform: uppercase;
+  color: #71717a;
+  margin-bottom: 0.45rem;
+}
+
+.papipu-counter {
+  display: block;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  /* 24 monospace digits = 24 × 0.6em wide; shrink with viewport, never wrap */
+  font-size: min(calc((100vw - 2rem) / 14.6), 1.7rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  color: #fafafa;
+  text-shadow: 0 0 24px rgba(255, 60, 60, 0.35);
+}
+
+.papipu-counter-flash {
+  animation: counter-flash 0.15s ease-out;
+}
+
+@keyframes counter-flash {
+  0% {
+    color: #fafafa;
+    text-shadow: 0 0 24px rgba(255, 60, 60, 0.35);
+  }
+  40% {
+    color: #ffffff;
+    text-shadow:
+      0 0 26px rgba(255, 90, 90, 0.6),
+      0 0 46px rgba(255, 60, 60, 0.3);
+  }
+  100% {
+    color: #fafafa;
+    text-shadow: 0 0 24px rgba(255, 60, 60, 0.35);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Button ── */
+.papipu-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.papipu-ring {
+  border-radius: 9999px;
+  padding: 0.9rem;
+  background: linear-gradient(160deg, #2a2a2a 0%, #0d0d0d 55%, #050505 100%);
+  box-shadow:
+    0 0 0 5px #111,
+    0 0 0 9px #000,
+    0 0 55px rgba(255, 45, 45, 0.45),
+    inset 0 3px 8px rgba(255, 255, 255, 0.07),
+    inset 0 -6px 14px rgba(0, 0, 0, 0.85);
+}
+
+.papipu-button {
+  position: relative;
+  display: block;
+  width: min(75.5vw, 315px);
+  height: min(75.5vw, 315px);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  will-change: transform;
+  background: radial-gradient(
+    circle at 32% 22%,
+    #ff6b6b 0%,
+    #e02020 42%,
+    #c01010 68%,
+    #8b0000 100%
+  );
+  box-shadow:
+    inset 0 14px 22px rgba(255, 255, 255, 0.32),
+    inset 0 -18px 28px rgba(80, 0, 0, 0.55),
+    0 14px 32px rgba(0, 0, 0, 0.65),
+    0 0 70px rgba(255, 40, 40, 0.5);
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+
+/* Glass-like top highlight */
+.papipu-button::before {
+  content: "";
+  position: absolute;
+  top: 7%;
+  left: 16%;
+  width: 68%;
+  height: 40%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.papipu-button-pressed {
+  transform: scale(0.94) translateY(4px);
+  box-shadow:
+    inset 0 6px 12px rgba(255, 255, 255, 0.22),
+    inset 0 -8px 16px rgba(80, 0, 0, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.6),
+    0 0 90px rgba(255, 60, 60, 0.8);
+}
+
+/* ── Tagline ── */
+.papipu-tagline {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.05rem, 4.6vw, 1.3rem);
+  font-weight: 300;
+  letter-spacing: 0.13em;
+  text-indent: 0.13em;
+  line-height: 1.9;
+  color: #e8d5a3;
+  text-shadow: 0 0 18px rgba(212, 175, 55, 0.25);
+}
+
+/* ── Footer ── */
+.papipu-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: #52525b;
 }
