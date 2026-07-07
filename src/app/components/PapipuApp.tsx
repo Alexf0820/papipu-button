@@ -1,12 +1,14 @@
-const PLACEHOLDER_COUNT = "000000000000000000000000";
+import { getFormattedWorldCount } from "@/lib/supabase/worldCount";
 
-export default function PapipuApp() {
+export default async function PapipuApp() {
+  const worldCount = await getFormattedWorldCount();
+
   return (
     <div className="papipu-page">
       <header className="papipu-counter-wrap">
         <span className="papipu-counter-label">World Total</span>
         <span id="papipu-counter" className="papipu-counter">
-          {PLACEHOLDER_COUNT}
+          {worldCount}
         </span>
       </header>
 

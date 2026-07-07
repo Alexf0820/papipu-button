@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,6 +31,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabaseConfig = getSupabasePublicConfig();
+
   return (
     <html
       lang="en"
@@ -36,10 +40,18 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `window.__PapipuSupabaseConfig=${JSON.stringify(supabaseConfig)};`,
+          }}
+        />
         {/* eslint-disable-next-line @next/next/no-sync-scripts -- tatakuna.js と同じ素の script 読み込み */}
         <script src="/papipu-audio.js" suppressHydrationWarning />
         {/* eslint-disable-next-line @next/next/no-sync-scripts -- tatakuna.js と同じ素の script 読み込み */}
         <script src="/papipu-button.js" suppressHydrationWarning />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts -- 世界カウンター（音声とは独立） */}
+        <script src="/papipu-counter.js" suppressHydrationWarning />
       </body>
     </html>
   );
