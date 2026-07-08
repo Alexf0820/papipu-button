@@ -717,6 +717,25 @@
     }
   }
 
+  function supportsFileShare() {
+    if (typeof navigator.share !== "function") return false;
+    if (typeof navigator.canShare !== "function") return false;
+
+    try {
+      var probe = new File([new Uint8Array([0])], "probe.png", {
+        type: "image/png",
+      });
+      return navigator.canShare({ files: [probe] });
+    } catch {
+      return false;
+    }
+  }
+
+  function updateShareButtonLabel() {
+    if (!elSave) return;
+    elSave.textContent = supportsFileShare() ? "Share" : "Download Image";
+  }
+
   function downloadMilestoneBlob(blob, filename) {
     var url = URL.createObjectURL(blob);
     var link = document.createElement("a");
@@ -771,13 +790,13 @@
           .catch(function (error) {
             if (error && error.name === "AbortError") return;
             downloadMilestoneBlob(blob, filename);
-            trackAnalytics("trackSaveImageClick", analyticsParams);
+            trackAnalytics("trackShareClick", analyticsParams);
           });
         return;
       }
 
       downloadMilestoneBlob(blob, filename);
-      trackAnalytics("trackSaveImageClick", analyticsParams);
+      trackAnalytics("trackShareClick", analyticsParams);
     }, "image/png");
   }
 
@@ -794,7 +813,7 @@
       '<div class="papipu-milestone-inner">' +
       '<div class="papipu-milestone-card"></div>' +
       '<div class="papipu-milestone-actions">' +
-      '<button type="button" id="papipu-milestone-save" class="papipu-milestone-btn papipu-milestone-btn-secondary">Save Image</button>' +
+      '<button type="button" id="papipu-milestone-save" class="papipu-milestone-btn papipu-milestone-btn-secondary">Share</button>' +
       '<button type="button" id="papipu-milestone-continue" class="papipu-milestone-btn">Continue</button>' +
       '<p id="papipu-milestone-countdown" class="papipu-milestone-countdown" aria-live="polite"></p>' +
       "</div>" +
@@ -806,6 +825,7 @@
     elContinue = document.getElementById("papipu-milestone-continue");
     elSave = document.getElementById("papipu-milestone-save");
     elCountdown = document.getElementById("papipu-milestone-countdown");
+    updateShareButtonLabel();
 
     if (elContinue) {
       elContinue.addEventListener("click", hideMilestone);
