@@ -31,7 +31,18 @@ export default async function PapipuApp() {
         </p>
       </main>
 
-      <footer className="papipu-footer">by Project PapipupePopcorn</footer>
+      <footer className="papipu-footer">
+        <p className="papipu-footer-credit">by Project PapipupePopcorn</p>
+        <a
+          id="papipu-support-link"
+          className="papipu-support-link"
+          href="https://buymeacoffee.com/4ppopcorn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Support this project
+        </a>
+      </footer>
     </div>
   );
 }

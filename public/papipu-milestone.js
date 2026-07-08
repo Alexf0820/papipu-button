@@ -23,6 +23,9 @@
   var elSave;
   var currentRank = "gold";
   var dismissTimer;
+  var countdownTimer;
+  var dismissDeadline = 0;
+  var elCountdown;
 
   /* ── Count helpers ── */
   function parseCount(value) {
@@ -169,10 +172,43 @@
     }
   }
 
+  function clearCountdownTimer() {
+    if (countdownTimer) {
+      window.clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }
+
+  function updateCountdownDisplay() {
+    if (!elCountdown) return;
+
+    var remainingMs = dismissDeadline - Date.now();
+    var seconds = Math.max(0, Math.ceil(remainingMs / 1000));
+    elCountdown.textContent =
+      "This card closes in " +
+      seconds +
+      " second" +
+      (seconds === 1 ? "" : "s") +
+      ".";
+  }
+
+  function startCountdown() {
+    clearCountdownTimer();
+    dismissDeadline = Date.now() + AUTO_DISMISS_MS;
+    updateCountdownDisplay();
+    countdownTimer = window.setInterval(function () {
+      updateCountdownDisplay();
+      if (Date.now() >= dismissDeadline) {
+        clearCountdownTimer();
+      }
+    }, 1000);
+  }
+
   function hideMilestone() {
     if (!elRoot || !elPage) return;
 
     clearDismissTimer();
+    clearCountdownTimer();
     elRoot.classList.add("hidden");
     elRoot.hidden = true;
     elPage.classList.remove("papipu-page-hidden");
@@ -334,6 +370,7 @@
     dismissTimer = window.setTimeout(function () {
       hideMilestone();
     }, AUTO_DISMISS_MS);
+    startCountdown();
   }
 
   function onCounterChange() {
@@ -669,6 +706,28 @@
     ctx.fillText("One History.", cx, height * 0.79);
   }
 
+  function trackAnalytics(method, params) {
+    var analytics = window.PapipuAnalytics;
+    if (!analytics || typeof analytics[method] !== "function") return;
+
+    try {
+      analytics[method](params || {});
+    } catch (error) {
+      console.warn("Analytics skipped:", error);
+    }
+  }
+
+  function downloadMilestoneBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   function saveMilestoneImage() {
     if (!elCardCounter) return;
 
@@ -691,14 +750,34 @@
     canvas.toBlob(function (blob) {
       if (!blob) return;
 
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.href = url;
-      link.download = "papipu-" + currentRank + "-push.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      var filename = "papipu-" + currentRank + "-push.png";
+      var file = new File([blob], filename, { type: "image/png" });
+      var analyticsParams = { rank: currentRank };
+
+      if (
+        typeof navigator.share === "function" &&
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        navigator
+          .share({
+            files: [file],
+            title: "PapipuButton",
+            text: "One Button. One World.",
+          })
+          .then(function () {
+            trackAnalytics("trackShareClick", analyticsParams);
+          })
+          .catch(function (error) {
+            if (error && error.name === "AbortError") return;
+            downloadMilestoneBlob(blob, filename);
+            trackAnalytics("trackSaveImageClick", analyticsParams);
+          });
+        return;
+      }
+
+      downloadMilestoneBlob(blob, filename);
+      trackAnalytics("trackSaveImageClick", analyticsParams);
     }, "image/png");
   }
 
@@ -717,6 +796,7 @@
       '<div class="papipu-milestone-actions">' +
       '<button type="button" id="papipu-milestone-save" class="papipu-milestone-btn papipu-milestone-btn-secondary">Save Image</button>' +
       '<button type="button" id="papipu-milestone-continue" class="papipu-milestone-btn">Continue</button>' +
+      '<p id="papipu-milestone-countdown" class="papipu-milestone-countdown" aria-live="polite"></p>' +
       "</div>" +
       "</div>";
 
@@ -725,6 +805,7 @@
     elCard = elRoot.querySelector(".papipu-milestone-card");
     elContinue = document.getElementById("papipu-milestone-continue");
     elSave = document.getElementById("papipu-milestone-save");
+    elCountdown = document.getElementById("papipu-milestone-countdown");
 
     if (elContinue) {
       elContinue.addEventListener("click", hideMilestone);

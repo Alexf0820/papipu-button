@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { GA_MEASUREMENT_ID, isGaEnabled } from "@/lib/gtag";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import "./globals.css";
 
@@ -40,6 +41,23 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        {isGaEnabled() ? (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              suppressHydrationWarning
+            />
+            <script
+              suppressHydrationWarning
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}',{send_page_view:false});`,
+              }}
+            />
+            {/* eslint-disable-next-line @next/next/no-sync-scripts -- analytics helper (gtag 経由) */}
+            <script src="/papipu-analytics.js" suppressHydrationWarning />
+          </>
+        ) : null}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{

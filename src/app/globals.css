@@ -187,11 +187,31 @@ body {
 .papipu-footer {
   margin-top: auto;
   padding-top: 1rem;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   text-align: center;
+}
+
+.papipu-footer-credit {
   font-size: 0.68rem;
   font-weight: 400;
   letter-spacing: 0.14em;
   color: #52525b;
+}
+
+.papipu-support-link {
+  display: inline-block;
+  margin-top: 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: #3f3f46;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.papipu-support-link:hover,
+.papipu-support-link:focus-visible {
+  color: #71717a;
 }
 
 .papipu-page-hidden {
@@ -508,6 +528,15 @@ body {
   border-color: #52525b;
   background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
   color: #d4d4d8;
+}
+
+.papipu-milestone-countdown {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #71717a;
+  text-align: center;
 }
 
 /* ── World Record (完全別物: 宇宙 / 虹色 / 地球の光) ── */

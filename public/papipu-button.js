@@ -43,8 +43,20 @@
     });
   }
 
+  function trackAnalytics(method, params) {
+    var analytics = window.PapipuAnalytics;
+    if (!analytics || typeof analytics[method] !== "function") return;
+
+    try {
+      analytics[method](params || {});
+    } catch (error) {
+      console.warn("Analytics skipped:", error);
+    }
+  }
+
   function handleTap() {
     window.playSound("/sounds/button-pop.m4a");
+    trackAnalytics("trackMainButtonClick", {});
     playTapAnimation();
     playCounterFlash();
   }
