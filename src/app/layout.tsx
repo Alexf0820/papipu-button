@@ -3,6 +3,12 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { GA_MEASUREMENT_ID, isGaEnabled } from "@/lib/gtag";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_OG_SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,8 +22,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PapipuButton",
-  description: "One Button. One World. — by Project PapipupePopcorn",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: {
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_OG_SITE_NAME,
+    type: "website",
+    locale: "en",
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  icons: {
+    icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: SITE_NAME,
+  },
 };
 
 export const viewport: Viewport = {

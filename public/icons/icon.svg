@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PapipuButton">
+  <rect width="512" height="512" fill="#000000" />
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#141414" stroke-width="28" />
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#050505" stroke-width="10" />
+  <circle cx="256" cy="256" r="148" fill="#e02020" />
+  <circle cx="256" cy="256" r="148" fill="url(#buttonGlow)" />
+  <ellipse cx="256" cy="206" rx="88" ry="44" fill="rgba(255,255,255,0.24)" />
+  <defs>
+    <radialGradient id="buttonGlow" cx="34%" cy="24%" r="72%">
+      <stop offset="0%" stop-color="#ff6b6b" />
+      <stop offset="45%" stop-color="#e02020" />
+      <stop offset="100%" stop-color="#8b0000" />
+    </radialGradient>
+  </defs>
+</svg>
