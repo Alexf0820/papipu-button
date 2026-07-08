@@ -851,4 +851,106 @@
   } else {
     scheduleInit();
   }
+
+  /* ── Debug (dev console only) ── */
+  var DEBUG_EXTRA_COUNTS = [
+    11111111,
+    22222222,
+    99999999,
+    12345678,
+    123456789,
+    9876543,
+    98765432,
+    987654321,
+    10000000,
+    100000000,
+  ];
+
+  function describeMilestoneForDebug(count) {
+    count = parseCount(count);
+    if (count < 10) return null;
+
+    if (WORLD_RECORD_COUNTS.indexOf(count) !== -1) {
+      return { rank: "world-record", reason: "configured" };
+    }
+
+    var exp = powerOfTenExponent(count);
+    if (exp >= 6) return { rank: "gold", reason: "power_of_ten" };
+    if (exp >= 3) return { rank: "silver", reason: "power_of_ten" };
+    if (exp >= 1) return { rank: "bronze", reason: "power_of_ten" };
+
+    var rep = repeatingDigitLength(count);
+    if (rep >= 5) return { rank: "silver", reason: "repeating_digits" };
+    if (rep >= 3) return { rank: "bronze", reason: "repeating_digits" };
+
+    if (isAscendingConsecutive(count)) {
+      return { rank: "bronze", reason: "ascending" };
+    }
+    if (isDescendingConsecutive(count)) {
+      return { rank: "bronze", reason: "descending" };
+    }
+
+    return null;
+  }
+
+  function printMilestoneDebugTable() {
+    var max = 1500000;
+    var rows = [];
+    var totals = {
+      bronze: 0,
+      silver: 0,
+      gold: 0,
+      "world-record": 0,
+    };
+    var seen = {};
+    var c;
+    var match;
+    var i;
+
+    function appendDebugCount(count) {
+      if (seen[count]) return;
+      match = describeMilestoneForDebug(count);
+      if (!match) return;
+      seen[count] = true;
+      totals[match.rank] += 1;
+      rows.push({
+        Count: count,
+        Rank: match.rank,
+        Reason: match.reason,
+      });
+    }
+
+    for (c = 0; c <= max; c += 1) {
+      appendDebugCount(c);
+    }
+
+    for (i = 0; i < WORLD_RECORD_COUNTS.length; i += 1) {
+      appendDebugCount(WORLD_RECORD_COUNTS[i]);
+    }
+
+    for (i = 0; i < DEBUG_EXTRA_COUNTS.length; i += 1) {
+      appendDebugCount(DEBUG_EXTRA_COUNTS[i]);
+    }
+
+    rows.sort(function (a, b) {
+      return a.Count - b.Count;
+    });
+
+    console.table(rows);
+    console.log(
+      "Bronze: " +
+        totals.bronze +
+        "\nSilver: " +
+        totals.silver +
+        "\nGold: " +
+        totals.gold +
+        "\nWorld Record: " +
+        totals["world-record"]
+    );
+    console.log(WORLD_RECORD_COUNTS);
+  }
+
+  window.PapipuMilestoneDebug = {
+    printTable: printMilestoneDebugTable,
+  };
 })();
