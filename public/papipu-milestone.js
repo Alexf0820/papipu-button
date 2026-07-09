@@ -375,8 +375,14 @@
 
   function onCounterChange() {
     if (!elWorldCounter) return;
+    if (elWorldCounter.getAttribute("data-loading") === "true") return;
 
     var count = parseCount(elWorldCounter.textContent);
+    if (previousCount < 0) {
+      previousCount = count;
+      return;
+    }
+
     if (count > previousCount) {
       var rank = classifyCount(count);
       if (rank) {
@@ -844,7 +850,11 @@
 
     initialized = true;
     createMilestoneScreen();
-    previousCount = parseCount(elWorldCounter.textContent);
+    if (elWorldCounter.getAttribute("data-loading") === "true") {
+      previousCount = -1;
+    } else {
+      previousCount = parseCount(elWorldCounter.textContent);
+    }
 
     var observer = new MutationObserver(function () {
       onCounterChange();

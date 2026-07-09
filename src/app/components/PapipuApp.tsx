@@ -1,14 +1,16 @@
-import { getFormattedWorldCount } from "@/lib/supabase/worldCount";
+import { WORLD_COUNT_LOADING_DISPLAY } from "@/lib/supabase/formatCount";
 
-export default async function PapipuApp() {
-  const worldCount = await getFormattedWorldCount();
-
+export default function PapipuApp() {
   return (
     <div className="papipu-page">
       <header className="papipu-counter-wrap">
         <span className="papipu-counter-label">World Total</span>
-        <span id="papipu-counter" className="papipu-counter">
-          {worldCount}
+        <span
+          id="papipu-counter"
+          className="papipu-counter"
+          data-loading="true"
+        >
+          {WORLD_COUNT_LOADING_DISPLAY}
         </span>
       </header>
 
