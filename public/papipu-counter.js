@@ -10,6 +10,11 @@
   var elTapButton;
   var config;
 
+  console.log("[counter] script loaded", {
+    calledAt: new Date().toISOString(),
+    readyState: document.readyState,
+  });
+
   function getConfig() {
     return window.__PapipuSupabaseConfig || null;
   }
@@ -50,20 +55,51 @@
       .slice(-COUNTER_DIGITS);
   }
 
+  function getDisplayedCount() {
+    return elCounter ? elCounter.textContent : null;
+  }
+
   function applyCount(count) {
     var nextCount = parseCount(count);
-    if (nextCount < lastDisplayedCount) return;
+    console.log("[counter] applyCount", nextCount, {
+      calledAt: new Date().toISOString(),
+      lastDisplayedCount: lastDisplayedCount,
+      currentCount: nextCount,
+      displayedCount: getDisplayedCount(),
+    });
+
+    if (nextCount < lastDisplayedCount) {
+      console.log("[counter] applyCount skipped", {
+        calledAt: new Date().toISOString(),
+        reason: "nextCount < lastDisplayedCount",
+        lastDisplayedCount: lastDisplayedCount,
+        currentCount: nextCount,
+        displayedCount: getDisplayedCount(),
+      });
+      return;
+    }
+
     lastDisplayedCount = nextCount;
     if (elCounter) {
       elCounter.textContent = formatCount(nextCount);
       elCounter.removeAttribute("data-loading");
     }
+
+    console.log("[counter] applyCount applied", {
+      calledAt: new Date().toISOString(),
+      lastDisplayedCount: lastDisplayedCount,
+      currentCount: nextCount,
+      displayedCount: getDisplayedCount(),
+    });
   }
 
   function applyFallbackCount(reason, details) {
-    console.log("[papipu-counter] applyFallbackCount", {
+    console.log("[counter] applyFallbackCount", {
       calledAt: new Date().toISOString(),
       reason: reason || "unknown",
+      lastDisplayedCount: lastDisplayedCount,
+      currentCount: 0,
+      displayedCount: getDisplayedCount(),
       details: details || null,
     });
     console.error("[papipu-counter] applyFallbackCount", {
@@ -75,6 +111,12 @@
       elCounter.textContent = formatCount(0);
       elCounter.removeAttribute("data-loading");
     }
+    console.log("[counter] applyFallbackCount applied", {
+      calledAt: new Date().toISOString(),
+      lastDisplayedCount: lastDisplayedCount,
+      currentCount: 0,
+      displayedCount: getDisplayedCount(),
+    });
   }
 
   function isCounterLoading() {
@@ -87,6 +129,7 @@
       apikey: config.anonKey,
       Authorization: "Bearer " + config.anonKey,
       "Content-Type": "application/json",
+      Accept: "application/json",
     };
   }
 
@@ -94,9 +137,15 @@
     if (!elCounter) return;
     if (isCounterLoading() || elCounter.textContent === LOADING_DISPLAY) {
       lastDisplayedCount = -1;
-      return;
+    } else {
+      lastDisplayedCount = parseCount(elCounter.textContent);
     }
-    lastDisplayedCount = parseCount(elCounter.textContent);
+    console.log("[counter] seedDisplayedCountFromDom", lastDisplayedCount, {
+      calledAt: new Date().toISOString(),
+      currentCount: lastDisplayedCount,
+      displayedCount: getDisplayedCount(),
+      loading: isCounterLoading(),
+    });
   }
 
   function extractCountFromInitialResponse(data) {
@@ -107,27 +156,64 @@
       return data;
     }
 
+    // "123"
+    if (typeof data === "string") {
+      var trimmed = data.trim();
+      if (/^\d+$/.test(trimmed)) {
+        return parseCount(trimmed);
+      }
+      return null;
+    }
+
     // { count: 123 }
     if (!Array.isArray(data) && typeof data === "object" && data.count != null) {
       return data.count;
     }
 
-    // [{ count: 123 }]
-    if (Array.isArray(data) && data.length > 0 && data[0]) {
+    // [{ count: 123 }] or [123]
+    if (Array.isArray(data) && data.length > 0 && data[0] != null) {
       if (typeof data[0] === "object" && data[0].count != null) {
         return data[0].count;
+      }
+      if (typeof data[0] === "number") {
+        return data[0];
+      }
+      if (typeof data[0] === "string" && /^\d+$/.test(String(data[0]).trim())) {
+        return parseCount(data[0]);
       }
     }
 
     return null;
   }
 
+  function parseInitialResponseBody(body) {
+    var trimmed = String(body).trim();
+    if (!trimmed) return null;
+
+    try {
+      return JSON.parse(trimmed);
+    } catch (parseError) {
+      if (/^\d+$/.test(trimmed)) {
+        return parseCount(trimmed);
+      }
+      throw parseError;
+    }
+  }
+
   function fetchInitialCount() {
-    if (initialFetchDone) return;
+    if (initialFetchDone) {
+      console.log("[counter] fetchInitialCount skipped", {
+        calledAt: new Date().toISOString(),
+        reason: "initialFetchDone",
+      });
+      return;
+    }
     initialFetchDone = true;
 
-    console.log("[papipu-counter] fetchInitialCount called", {
+    console.log("[counter] fetchInitialCount start", {
       calledAt: new Date().toISOString(),
+      lastDisplayedCount: lastDisplayedCount,
+      displayedCount: getDisplayedCount(),
     });
     logSupabaseDiagnostics("fetchInitialCount:start", {
       endpoint: "GET /rest/v1/button_counter?id=eq.1&select=count",
@@ -147,23 +233,18 @@
     var requestUrl =
       config.url + "/rest/v1/button_counter?id=eq.1&select=count";
 
-    console.log("[papipu-counter] fetchInitialCount request", {
-      calledAt: new Date().toISOString(),
-      supabaseUrl: config.url,
-      requestUrl: requestUrl,
-      method: "GET",
-    });
-
     fetch(requestUrl, { headers: supabaseHeaders() })
       .then(function (res) {
         return res.text().then(function (body) {
-          console.log("[papipu-counter] fetchInitialCount response", {
+          console.log("[counter] fetchInitialCount response", {
             calledAt: new Date().toISOString(),
             supabaseUrl: config.url,
             requestUrl: requestUrl,
             status: res.status,
             ok: res.ok,
             responseBody: body,
+            lastDisplayedCount: lastDisplayedCount,
+            displayedCount: getDisplayedCount(),
           });
 
           if (!res.ok) {
@@ -178,7 +259,7 @@
           }
 
           try {
-            return JSON.parse(body);
+            return parseInitialResponseBody(body);
           } catch (parseError) {
             console.error("[papipu-counter] fetchInitialCount JSON parse error", {
               supabaseUrl: config.url,
@@ -193,11 +274,20 @@
       })
       .then(function (payload) {
         var count = extractCountFromInitialResponse(payload);
+        console.log("[counter] fetchInitialCount parsed", {
+          calledAt: new Date().toISOString(),
+          payload: payload,
+          count: count,
+          payloadType: payload === null ? "null" : typeof payload,
+          lastDisplayedCount: lastDisplayedCount,
+          displayedCount: getDisplayedCount(),
+        });
+
         if (count != null) {
-          console.log("[papipu-counter] fetchInitialCount success", {
+          console.log("[counter] fetchInitialCount success", count, {
             calledAt: new Date().toISOString(),
-            count: count,
-            payload: payload,
+            lastDisplayedCount: lastDisplayedCount,
+            displayedCount: getDisplayedCount(),
           });
           applyCount(count);
           return;
@@ -252,13 +342,6 @@
 
     var requestUrl = config.url + "/rest/v1/rpc/increment_counter";
 
-    console.log("[papipu-counter] incrementCounter request", {
-      calledAt: new Date().toISOString(),
-      supabaseUrl: config.url,
-      requestUrl: requestUrl,
-      method: "POST",
-    });
-
     fetch(requestUrl, {
       method: "POST",
       headers: supabaseHeaders(),
@@ -312,17 +395,38 @@
   function init() {
     if (initialized) return;
 
+    console.log("[counter] init start", {
+      calledAt: new Date().toISOString(),
+      readyState: document.readyState,
+    });
+
     config = getConfig();
     bindElements();
-    if (!elTapButton) return;
+    if (!elTapButton) {
+      console.log("[counter] init aborted", {
+        calledAt: new Date().toISOString(),
+        reason: "missing tap-button",
+      });
+      return;
+    }
 
     initialized = true;
     seedDisplayedCountFromDom();
     elTapButton.addEventListener("click", incrementCounter);
     fetchInitialCount();
+
+    console.log("[counter] init complete", {
+      calledAt: new Date().toISOString(),
+      lastDisplayedCount: lastDisplayedCount,
+      displayedCount: getDisplayedCount(),
+    });
   }
 
   function scheduleInit() {
+    console.log("[counter] scheduleInit fired", {
+      calledAt: new Date().toISOString(),
+      readyState: document.readyState,
+    });
     window.setTimeout(function () {
       init();
       if (!initialized) {
@@ -332,8 +436,22 @@
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", scheduleInit, { once: true });
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+        console.log("[counter] DOMContentLoaded", {
+          calledAt: new Date().toISOString(),
+          readyState: document.readyState,
+        });
+        scheduleInit();
+      },
+      { once: true }
+    );
   } else {
+    console.log("[counter] DOMContentLoaded skipped (document already ready)", {
+      calledAt: new Date().toISOString(),
+      readyState: document.readyState,
+    });
     scheduleInit();
   }
 })();

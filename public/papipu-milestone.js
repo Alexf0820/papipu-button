@@ -856,7 +856,20 @@
       previousCount = parseCount(elWorldCounter.textContent);
     }
 
+    console.log("[counter] milestone MutationObserver observe", {
+      calledAt: new Date().toISOString(),
+      previousCount: previousCount,
+      displayedCount: elWorldCounter.textContent,
+      loading: elWorldCounter.getAttribute("data-loading"),
+    });
+
     var observer = new MutationObserver(function () {
+      console.log("[counter] milestone MutationObserver callback", {
+        calledAt: new Date().toISOString(),
+        previousCount: previousCount,
+        displayedCount: elWorldCounter.textContent,
+        loading: elWorldCounter.getAttribute("data-loading"),
+      });
       onCounterChange();
     });
 

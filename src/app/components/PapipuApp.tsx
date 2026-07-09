@@ -9,6 +9,7 @@ export default function PapipuApp() {
           id="papipu-counter"
           className="papipu-counter"
           data-loading="true"
+          suppressHydrationWarning
         >
           {WORLD_COUNT_LOADING_DISPLAY}
         </span>
