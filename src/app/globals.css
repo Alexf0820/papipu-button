@@ -525,6 +525,14 @@ body {
     0 0 40px color-mix(in srgb, var(--glow) 60%, transparent);
 }
 
+/* PCのマイルストーンカードだけ数字を少し小さくする */
+@media (min-width: 768px) {
+  .papipu-milestone-counter {
+    font-size: clamp(1.3rem, 2vw, 2.2rem);
+    letter-spacing: -0.03em;
+  }
+}
+
 .papipu-milestone-tagline {
   margin: 0;
   font-size: clamp(1rem, 4.4vw, 1.2rem);
