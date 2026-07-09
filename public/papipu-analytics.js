@@ -43,6 +43,12 @@
     trackSupportClick: function (params) {
       track("support_click", params);
     },
+    trackPwaInstallHintClick: function (params) {
+      track("pwa_install_hint_click", params);
+    },
+    trackPwaInstallHintClose: function (params) {
+      track("pwa_install_hint_close", params);
+    },
   };
 
   function bindSupportLink() {

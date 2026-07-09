@@ -9,6 +9,8 @@ declare global {
       trackShareClick: (params?: Record<string, unknown>) => void;
       trackSaveImageClick: (params?: Record<string, unknown>) => void;
       trackSupportClick: (params?: Record<string, unknown>) => void;
+      trackPwaInstallHintClick: (params?: Record<string, unknown>) => void;
+      trackPwaInstallHintClose: (params?: Record<string, unknown>) => void;
     };
   }
 }
