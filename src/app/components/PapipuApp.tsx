@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { WORLD_COUNT_LOADING_DISPLAY } from "@/lib/supabase/formatCount";
 
 export default function PapipuApp() {
@@ -52,6 +54,9 @@ export default function PapipuApp() {
         >
           by Project PapipupePopcorn
         </a>
+        <Link className="papipu-footer-info" href="/info">
+          Info
+        </Link>
       </footer>
     </div>
   );
