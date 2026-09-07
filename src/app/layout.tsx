@@ -9,6 +9,7 @@ import {
   SITE_OG_SITE_NAME,
   SITE_URL,
 } from "@/lib/site";
+import { PageViewTracker } from "./components/PageViewTracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -89,6 +90,7 @@ export default function RootLayout({
             />
             {/* eslint-disable-next-line @next/next/no-sync-scripts -- analytics helper (gtag 経由) */}
             <script src="/papipu-analytics.js" suppressHydrationWarning />
+            <PageViewTracker />
           </>
         ) : null}
         <script
