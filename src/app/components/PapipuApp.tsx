@@ -37,6 +37,7 @@ export default function PapipuApp() {
       </main>
 
       <footer className="papipu-footer">
+        <Link className="papipu-footer-info" href="/contact">Contact</Link>
         <a
           id="papipu-support-link"
           className="papipu-footer-support"
